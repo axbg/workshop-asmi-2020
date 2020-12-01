@@ -1,5 +1,5 @@
-from sqlalchemy import Column, Integer, TIMESTAMP
 from db import Base
+from sqlalchemy import Column, Integer, TIMESTAMP
 
 class Event(Base):
     __tablename__ = 'events'
@@ -15,6 +15,4 @@ class Event(Base):
     def to_json(self):
         timestamp = "{}-{}-{}#{}:{}".format(self.timestamp.day, self.timestamp.month, self.timestamp.year, self.timestamp.hour, self.timestamp.minute if self.timestamp.minute > 9 else "0" + str(self.timestamp.minute))
         
-        return {"id": self.id,
-                "timestamp": timestamp,
-                "duration": self.duration}
+        return { "id": self.id, "timestamp": timestamp, "duration": self.duration }
