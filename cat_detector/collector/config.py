@@ -5,7 +5,3 @@ def load_vars():
         vars = yaml.load(config_file, Loader = yaml.FullLoader)
 
     return vars
-
-if __name__ == "__main__":
-    vars = load_vars()
-    print(vars)
