@@ -25,7 +25,9 @@ class Observer:
         if no_of_pictures < n:
             n = no_of_pictures
 
-        return list(map(lambda x: "https://{}.s3.{}.amazonaws.com/{}".format(self.bucket_name, bucket_location, x["Key"]), pictures[-n:]))
+        result = list(map(lambda x: "https://{}.s3.{}.amazonaws.com/{}".format(self.bucket_name, bucket_location, x["Key"]), pictures[-n:]))[::-1]
+        
+        return result
 
     def analyze_picture(self, image):
         decoded_image = b64decode(image)
@@ -54,9 +56,8 @@ class Observer:
 
     def create_event(self):
         estimated_duration = (self.lost_timestamp - self.found_timestamp).total_seconds() / 60
-        
+
         duration = estimated_duration if estimated_duration != 0 else 1
-        
         ev = Event(timestamp=self.found_timestamp, duration=duration)
 
         self.found = False

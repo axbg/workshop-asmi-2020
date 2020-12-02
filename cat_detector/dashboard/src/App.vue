@@ -5,6 +5,7 @@
     </div>
     <div class="content-holder">
       <Panel
+        :pictures="pictures"
         v-on:range-changed="this.handleRangeUpdated"
         v-on:date-changed="this.handleDateUpdated"
       />
@@ -22,6 +23,7 @@ export default {
     return {
       labels: [],
       meals: [],
+      pictures: [],
     };
   },
   components: {
@@ -58,6 +60,7 @@ export default {
 
     this.clearData();
     this.handleRangeUpdated(10);
+    this.loadPictures();
   },
   methods: {
     clearData() {
@@ -92,11 +95,16 @@ export default {
       this.labels = this.dayLabels;
       this.meals = emptyDay;
     },
+    async loadPictures() {
+      const response = await fetch("http://localhost:5000/pictures");
+      this.pictures = await response.json();
+    },
   },
   computed: {
     chartStyle() {
       return {
         width: "90%",
+        margin: '0 auto'
       };
     },
   },
@@ -112,18 +120,21 @@ body {
 
 .container {
   font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
   color: #2c3e50;
   margin: 0 auto;
   text-align: center;
   height: 100%;
-  width: 100%;
   display: grid;
-  grid-template-columns: 50% 1fr;
+  grid-template-columns: 50% 50%;
 }
 
 .content-holder {
   height: 100%;
+}
+
+@media only screen and (max-width: 750px) {
+  .container {
+    grid-template-columns: 1fr;
+  }
 }
 </style>

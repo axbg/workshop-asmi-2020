@@ -1,10 +1,10 @@
 <template>
   <div class="panel-container">
     <h2>Cat Observer</h2>
-    <div class="range-container">
+    <div class="content-container">
       <p>Change the number of observed days</p>
       <md-field class="md-custom-field">
-        <label>Day</label>
+        <label>Days</label>
         <md-input
           class="md-custom-input"
           min="1"
@@ -13,11 +13,14 @@
           type="number"
         ></md-input>
       </md-field>
-      <md-button class="md-custom-button md-raised" @click="this.rangeChanged"
+      <md-button
+        class="md-custom-button md-raised"
+        :md-ripple="false"
+        @click="this.rangeChanged"
         >Ok</md-button
       >
     </div>
-    <div class="date-container">
+    <div class="content-container">
       <p>Observe a specific date</p>
       <date-picker
         v-model="date"
@@ -26,17 +29,24 @@
         @input="this.dateChanged"
       ></date-picker>
     </div>
+    <div class="content-container">
+      <p>Last pictures</p>
+      <Gallery :pictures="pictures" />
+    </div>
   </div>
 </template>
 
 <script>
 import DatePicker from "vue2-datepicker";
 import "vue2-datepicker/index.css";
+import Gallery from "./Gallery";
 
 export default {
   name: "Panel",
+  props: ["pictures"],
   components: {
     DatePicker,
+    Gallery,
   },
   data() {
     return {
@@ -88,11 +98,8 @@ export default {
   width: 100%;
 }
 
-.range-container {
-  margin-top: 10vh;
-}
-
-.date-container {
-  margin-top: 10vh;
+.content-container {
+  width: 100%;
+  margin-top: 7vh;
 }
 </style>
