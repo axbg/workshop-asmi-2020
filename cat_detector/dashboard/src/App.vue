@@ -1,7 +1,7 @@
 <template>
   <div class="container">
     <div class="content-holder">
-      <Chart :styles="myStyles" />
+      <Chart :styles="chartStyle" :labels="labels" :meals="meals" />
     </div>
     <div class="content-holder">
       <Panel />
@@ -15,12 +15,36 @@ import Panel from "./components/Panel";
 
 export default {
   name: "App",
+  data() {
+    return {
+      labels: [],
+      meals: [],
+    };
+  },
   components: {
     Chart,
-    Panel
+    Panel,
+  },
+  mounted() {
+    this.labels = [
+      "January",
+      "February",
+      "March",
+      "April",
+      "May",
+      "June",
+      "July",
+      "August",
+      "September",
+      "October",
+      "November",
+      "December",
+    ];
+
+    this.meals = [40, 20, 12, 39, 10, 40, 39, 80, 40, 20, 12, 11];
   },
   computed: {
-    myStyles() {
+    chartStyle() {
       return {
         width: "90%",
       };
