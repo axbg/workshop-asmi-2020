@@ -1,28 +1,55 @@
 <template>
-  <div id="app">
-    <img alt="Vue logo" src="./assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
+  <div class="container">
+    <div class="content-holder">
+      <Chart :styles="myStyles" />
+    </div>
+    <div class="content-holder">
+      <Panel />
+    </div>
   </div>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+import Chart from "./components/Chart";
+import Panel from "./components/Panel";
 
 export default {
-  name: 'App',
+  name: "App",
   components: {
-    HelloWorld
-  }
-}
+    Chart,
+    Panel
+  },
+  computed: {
+    myStyles() {
+      return {
+        width: "90%",
+      };
+    },
+  },
+};
 </script>
 
 <style>
-#app {
+html,
+body {
+  height: 100%;
+  margin: 0;
+}
+
+.container {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  text-align: center;
   color: #2c3e50;
-  margin-top: 60px;
+  margin: 0 auto;
+  text-align: center;
+  height: 100%;
+  width: 100%;
+  display: grid;
+  grid-template-columns: 50% 50%;
+}
+
+.content-holder {
+  height: 100%;
 }
 </style>
