@@ -39,6 +39,10 @@ CORS(app)
 def index():
     return "collector is running" 
 
+@app.route('/pictures', methods=['GET'])
+def pictures():
+    return json.dumps(observer.get_last_pictures(5))
+
 @app.route("/data", methods=['GET'])
 def get_data():
     try:

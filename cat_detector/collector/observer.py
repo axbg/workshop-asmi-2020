@@ -16,6 +16,17 @@ class Observer:
         self.bucket_client = boto3.client('s3', region_name='eu-central-1', aws_access_key_id=access_id, aws_secret_access_key= access_key)
         self.rekog_client = boto3.client('rekognition', region_name='eu-central-1', aws_access_key_id=access_id, aws_secret_access_key= access_key)
 
+    def get_last_pictures(self, n):
+        bucket_location = self.bucket_client.get_bucket_location(Bucket=self.bucket_name)['LocationConstraint']
+        pictures = self.bucket_client.list_objects_v2(Bucket=self.bucket_name)['Contents']
+        
+        no_of_pictures = len(pictures)
+
+        if no_of_pictures < n:
+            n = no_of_pictures
+
+        return list(map(lambda x: "https://{}.s3.{}.amazonaws.com/{}".format(self.bucket_name, bucket_location, x["Key"]), pictures[-n:]))
+
     def analyze_picture(self, image):
         decoded_image = b64decode(image)
         response = self.rekog_client.detect_labels(Image={'Bytes': decoded_image})
@@ -25,17 +36,11 @@ class Observer:
             self.found = True
             self.missed_frame = self.frame_counter_default
             self.lost_timestamp = None
-            self.cat_picture = decoded_image
 
             if self.found_timestamp is None:
+                self.cat_picture = decoded_image
                 self.found_timestamp = datetime.now()
-
-            now = datetime.now()
-
-            # this not ok
-            if self.last_time_saved is None or now > self.last_time_saved:
-                self.last_time_saved = now + timedelta(minutes = 5)
-                print("Cat found at: {}". format(now))
+                print("Cat found at: {}". format(self.found_timestamp))
         elif self.found:
             if self.missed_frame > 0:
                 self.missed_frame -= 1
