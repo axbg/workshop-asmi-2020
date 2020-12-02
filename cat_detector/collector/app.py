@@ -1,6 +1,6 @@
 import sys
-import sqlalchemy as sa
 import json 
+import sqlalchemy as sa
 
 from flask import Flask, request, jsonify
 from db import engine, Base, Session
@@ -24,10 +24,9 @@ def get_last_events(days):
     query_result = session.query(sa.func.concat(sa.func.year(Event.timestamp), '/', sa.func.month(Event.timestamp), '/', sa.func.day(Event.timestamp)), sa.func.count(Event.id)).filter(Event.timestamp > datetime.today() - timedelta(days = days)).group_by(sa.func.year(Event.timestamp), sa.func.month(Event.timestamp), sa.func.day(Event.timestamp)).order_by(Event.timestamp).all()
     return json.dumps(query_result)
 
-def get_all_events():
+def get_events_by_day(day, month, year):
     session = Session()
-    return json.dumps(serialize(session.query(Event).all()))
-
+    return json.dumps(serialize(session.query(Event).filter(sa.extract('day', Event.timestamp) == day, sa.extract('month', Event.timestamp) == month, sa.extract('year', Event.timestamp) == year).all()))
 
 env_vars = load_vars()
 
@@ -36,20 +35,34 @@ observer = Observer(4, env_vars['AWS_ACCESS_KEY'], env_vars['AWS_SECRET_KEY'])
 app = Flask("collector")
 
 
-@app.route("/", methods = ['GET'])
+@app.route("/", methods=['GET'])
 def index():
     return "collector is running" 
 
 @app.route("/data", methods=['GET'])
-def data():
+def get_data():
     try:
         days = int(request.args.get('days'))
-        if days is None or type(days) != int or days > 365:
+        if days is None or days > 365:
             raise ValueError
     except (ValueError, TypeError):
         days = 10
 
     return get_last_events(days)
+
+@app.route('/details', methods=['GET'])
+def get_detailed_day():
+    try:
+        day = int(request.args.get('day'))
+        month = int(request.args.get('month'))
+        year = int(request.args.get('year'))
+
+        if day is None or day > 31 or month is None or month > 12 or year is None or year < 2018 or year > 2022: 
+            raise ValueError
+    except (ValueError, TypeError) as ex:
+        return "Bad request", 400
+
+    return get_events_by_day(day, month, year)
 
 @app.route("/collect", methods = ['POST'])
 def collect():
