@@ -3,15 +3,13 @@ import json
 import sqlalchemy as sa
 
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 from db import engine, Base, Session
 from event import Event
 from observer import Observer
 from config import load_vars
 from datetime import datetime, timedelta
 from threading import Thread
-
-def serialize(query_result):
-    return list(map(lambda x: x.to_json(), query_result))
 
 def persist_event(event):
     session = Session()
@@ -21,18 +19,20 @@ def persist_event(event):
 
 def get_last_events(days):
     session = Session()
-    query_result = session.query(sa.func.concat(sa.func.year(Event.timestamp), '/', sa.func.month(Event.timestamp), '/', sa.func.day(Event.timestamp)), sa.func.count(Event.id)).filter(Event.timestamp > datetime.today() - timedelta(days = days)).group_by(sa.func.year(Event.timestamp), sa.func.month(Event.timestamp), sa.func.day(Event.timestamp)).order_by(Event.timestamp).all()
+    query_result = session.query(sa.func.concat(sa.func.day(Event.timestamp), '/', sa.func.month(Event.timestamp), '/', sa.func.year(Event.timestamp)), sa.func.count(Event.id)).filter(Event.timestamp > datetime.today() - timedelta(days = days)).group_by(sa.func.year(Event.timestamp), sa.func.month(Event.timestamp), sa.func.day(Event.timestamp)).order_by(Event.timestamp).all()
     return json.dumps(query_result)
 
 def get_events_by_day(day, month, year):
     session = Session()
-    return json.dumps(serialize(session.query(Event).filter(sa.extract('day', Event.timestamp) == day, sa.extract('month', Event.timestamp) == month, sa.extract('year', Event.timestamp) == year).all()))
+    return json.dumps(session.query(sa.func.hour(Event.timestamp), sa.func.count(Event.id)).filter(sa.extract('day', Event.timestamp) == day, sa.extract('month', Event.timestamp) == month, sa.extract('year', Event.timestamp) == year).group_by(sa.func.hour(Event.timestamp)).order_by(Event.timestamp).all())
 
 env_vars = load_vars()
 
 Base.metadata.create_all(engine)
 observer = Observer(4, env_vars['AWS_ACCESS_KEY'], env_vars['AWS_SECRET_KEY'])
 app = Flask("collector")
+
+CORS(app)
 
 
 @app.route("/", methods=['GET'])
@@ -50,7 +50,7 @@ def get_data():
 
     return get_last_events(days)
 
-@app.route('/details', methods=['GET'])
+@app.route('/detail', methods=['GET'])
 def get_detailed_day():
     try:
         day = int(request.args.get('day'))

@@ -4,7 +4,10 @@
       <Chart :styles="chartStyle" :labels="labels" :meals="meals" />
     </div>
     <div class="content-holder">
-      <Panel />
+      <Panel
+        v-on:range-changed="this.handleRangeUpdated"
+        v-on:date-changed="this.handleDateUpdated"
+      />
     </div>
   </div>
 </template>
@@ -26,22 +29,69 @@ export default {
     Panel,
   },
   mounted() {
-    this.labels = [
-      "January",
-      "February",
-      "March",
-      "April",
-      "May",
-      "June",
-      "July",
-      "August",
-      "September",
-      "October",
-      "November",
-      "December",
+    this.dayLabels = [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
     ];
 
-    this.meals = [40, 20, 12, 39, 10, 40, 39, 80, 40, 20, 12, 11];
+    this.clearData();
+    this.handleRangeUpdated(10);
+  },
+  methods: {
+    clearData() {
+      this.labels = [];
+      this.meals = [];
+    },
+    async handleRangeUpdated(range) {
+      const response = await fetch(`http://localhost:5000/data?days=${range}`);
+      const data = await response.json();
+
+      this.clearData();
+
+      data.map((entry) => {
+        this.labels.push(entry[0]);
+        this.meals.push(entry[1]);
+      });
+    },
+    async handleDateUpdated(date) {
+      const response = await fetch(
+        `http://localhost:5000/detail?year=${date[0]}&month=${date[1]}&day=${date[2]}`
+      );
+
+      const data = await response.json();
+      const emptyDay = Array.apply(null, Array(24)).map(
+        Number.prototype.valueOf,
+        0
+      );
+      data.map((entry) => (emptyDay[entry[0]] = entry[1]));
+
+      this.clearData();
+
+      this.labels = this.dayLabels;
+      this.meals = emptyDay;
+    },
   },
   computed: {
     chartStyle() {
@@ -70,7 +120,7 @@ body {
   height: 100%;
   width: 100%;
   display: grid;
-  grid-template-columns: 50% 50%;
+  grid-template-columns: 50% 1fr;
 }
 
 .content-holder {
