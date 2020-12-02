@@ -29,7 +29,7 @@ def get_events_by_day(day, month, year):
 env_vars = load_vars()
 
 Base.metadata.create_all(engine)
-observer = Observer(4, env_vars['AWS_ACCESS_KEY'], env_vars['AWS_SECRET_KEY'])
+observer = Observer(4, 'asmi-wshop-bucket', env_vars['AWS_ACCESS_KEY'], env_vars['AWS_SECRET_KEY'])
 app = Flask("collector")
 
 CORS(app)
