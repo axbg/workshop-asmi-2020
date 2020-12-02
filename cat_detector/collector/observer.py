@@ -40,7 +40,9 @@ class Observer:
         return False
 
     def create_event(self):
-        duration = (self.lost_timestamp - self.found_timestamp).total_seconds() / 60
+        estimated_duration = (self.lost_timestamp - self.found_timestamp).total_seconds() / 60
+        
+        duration = estimated_duration if estimated_duration != 0 else 1
         
         ev = Event(timestamp=self.found_timestamp, duration=duration)
 
