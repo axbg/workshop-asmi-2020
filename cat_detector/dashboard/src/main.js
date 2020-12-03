@@ -8,7 +8,7 @@ import 'vue-material/dist/theme/default.css'
 
 Vue.config.productionTip = false
 
-Vue.prototype.$baseUrl = "http://192.168.0.190:5000";
+Vue.prototype.$baseUrl = "https://example.com";
 
 Vue.use(MdButton);
 Vue.use(MdField);
