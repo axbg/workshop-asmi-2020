@@ -7,13 +7,14 @@ import json
 import sys
 import cv2
 import requests
+import config
 import numpy as np
 
 def upload_image(url, data):
     try:
         payload = {"image": data.decode('utf-8')}
         headers = {'Content-type': 'application/json'}
-        r = requests.post(url, headers=headers, data=json.dumps(payload))
+        r = requests.post(url, headers=headers, auth=(config.user, config.password), data=json.dumps(payload))
     except ConnectionError as ex:
         print("Couldn't send the image in the cloud")
         pass   
@@ -45,7 +46,7 @@ def display_stream(cam):
             break
     
 def main():
-    base_url = "http://localhost:5000"
+    base_url = "http://192.168.0.190:5000"
     cam = cv2.VideoCapture(0)
     
     if len(sys.argv) != 2:
