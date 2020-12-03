@@ -3,6 +3,8 @@ import json
 import sqlalchemy as sa
 
 from flask import Flask, request, jsonify
+from flask_httpauth import HTTPBasicAuth
+from werkzeug.security import generate_password_hash, check_password_hash
 from flask_cors import CORS
 from db import engine, Base, Session
 from event import Event
@@ -31,8 +33,18 @@ env_vars = load_vars()
 Base.metadata.create_all(engine)
 observer = Observer(4, 'asmi-wshop-bucket', env_vars['AWS_ACCESS_KEY'], env_vars['AWS_SECRET_KEY'])
 app = Flask("collector")
+auth = HTTPBasicAuth()
 
 CORS(app)
+
+users = {
+    "root": generate_password_hash(env_vars['BASIC_AUTH_PASSWORD'])
+}
+
+@auth.verify_password
+def verify_password(username, password):
+    if username in users and check_password_hash(users.get(username), password):
+        return username
 
 
 @app.route("/", methods=['GET'])
@@ -69,6 +81,7 @@ def get_detailed_day():
     return get_events_by_day(day, month, year)
 
 @app.route("/collect", methods = ['POST'])
+@auth.login_required()
 def collect():
     try:
         payload = request.get_json()
