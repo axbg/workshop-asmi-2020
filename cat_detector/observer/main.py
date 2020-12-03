@@ -14,7 +14,7 @@ import numpy as np
 def upload_image(url, data):
     try:
         payload = {"image": data.decode('utf-8')}
-        headers = {"Content-type": "application/json"}
+        headers = {'Content-type': 'application/json'}
 
         r = requests.post(url, headers=headers, auth=(
             config.user, config.password), data=json.dumps(payload))
@@ -27,8 +27,11 @@ def upload_image(url, data):
 
 def capture_pictures(cam, folder, url):
     while True:
-        for image_file in os.listdir(folder):
-            img = cv2.imread(os.path.join(folder, image_file))
+        for image_file in sorted(os.listdir(folder)):
+            print(image_file)
+
+            img = cv2.imencode(".jpg", cv2.imread(
+                os.path.join(folder, image_file)))[1]
 
             if img is not None:
                 data = b64encode(img)
