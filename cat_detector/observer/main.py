@@ -1,9 +1,9 @@
-from time import sleep
 from threading import Thread
 from base64 import b64encode, b64decode
 from requests.exceptions import ConnectionError
 
 import os
+import json
 import sys
 import cv2
 import requests
@@ -11,8 +11,9 @@ import numpy as np
 
 def upload_image(url, data):
     try:
-        headers = {'Content-Type': 'application/json'}
-        r = requests.post(url, headers=headers, data=data)
+        payload = {"image": data.decode('utf-8')}
+        headers = {'Content-type': 'application/json'}
+        r = requests.post(url, headers=headers, data=json.dumps(payload))
     except ConnectionError as ex:
         print("Couldn't send the image in the cloud")
         pass   
@@ -25,8 +26,6 @@ def capture_pictures(cam, folder, url):
             if img is not None:
                 data = b64encode(img)
                 upload_image(url, data)
-                
-                sleep(5)
             
 def capture_frames(cam, url): 
     while True:
@@ -35,8 +34,6 @@ def capture_frames(cam, url):
         
         data = b64encode(image)
         upload_image(url, data)
-      
-        sleep(5)
         
 def display_stream(cam):
     while True:
@@ -48,6 +45,7 @@ def display_stream(cam):
             break
     
 def main():
+    base_url = "http://localhost:5000"
     cam = cv2.VideoCapture(0)
     
     if len(sys.argv) != 2:
@@ -55,9 +53,9 @@ def main():
         exit(1)
         
     if sys.argv[1] == 'live':
-        capture_pictures(cam, './samples', "http://localhost:8080")
+        capture_frames(cam, "{}/collect".format(base_url))
     elif sys.argv[1] == 'disk':
-        capture_frames(cam, "http://localhost:8080")
+        capture_pictures(cam, "./samples", "{}/collect".format(base_url))
     else:
         display_stream(cam)
 

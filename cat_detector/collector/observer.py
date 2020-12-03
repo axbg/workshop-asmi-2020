@@ -33,7 +33,7 @@ class Observer:
         decoded_image = b64decode(image)
         response = self.rekog_client.detect_labels(Image={'Bytes': decoded_image})
         labels = list(map(lambda a: a['Name'] , response['Labels']))
-       
+              
         if "Cat" in labels:
             self.found = True
             self.missed_frame = self.frame_counter_default

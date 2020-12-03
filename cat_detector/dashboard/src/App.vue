@@ -68,7 +68,7 @@ export default {
       this.meals = [];
     },
     async handleRangeUpdated(range) {
-      const response = await fetch(`http://localhost:5000/data?days=${range}`);
+      const response = await fetch(`${this.$baseUrl}/data?days=${range}`);
       const data = await response.json();
 
       this.clearData();
@@ -80,7 +80,7 @@ export default {
     },
     async handleDateUpdated(date) {
       const response = await fetch(
-        `http://localhost:5000/detail?year=${date[0]}&month=${date[1]}&day=${date[2]}`
+        `${this.$baseUrl}/detail?year=${date[0]}&month=${date[1]}&day=${date[2]}`
       );
 
       const data = await response.json();
@@ -96,7 +96,7 @@ export default {
       this.meals = emptyDay;
     },
     async loadPictures() {
-      const response = await fetch("http://localhost:5000/pictures");
+      const response = await fetch(`${this.$baseUrl}/pictures`);
       this.pictures = await response.json();
     },
   },
@@ -129,6 +129,7 @@ body {
 }
 
 .content-holder {
+  width: 100%;
   height: 100%;
 }
 

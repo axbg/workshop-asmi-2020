@@ -70,9 +70,9 @@ def get_detailed_day():
 
 @app.route("/collect", methods = ['POST'])
 def collect():
-    payload = request.get_json()
-
     try:
+        payload = request.get_json()
+
         if "image" not in payload.keys():
             return jsonify(message="Invalid request"), 400
 
