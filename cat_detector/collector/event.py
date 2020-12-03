@@ -2,6 +2,7 @@ from db import Base
 from sqlalchemy import Column, Integer, TIMESTAMP
 from sqlalchemy.ext.hybrid import hybrid_property
 
+
 class Event(Base):
     __tablename__ = 'events'
 

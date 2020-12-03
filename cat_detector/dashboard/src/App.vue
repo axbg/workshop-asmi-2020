@@ -104,7 +104,7 @@ export default {
     chartStyle() {
       return {
         width: "90%",
-        margin: '0 auto'
+        margin: "0 auto",
       };
     },
   },

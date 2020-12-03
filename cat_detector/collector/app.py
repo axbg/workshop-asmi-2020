@@ -1,17 +1,18 @@
 import sys
-import json 
+import json
 import sqlalchemy as sa
 
+from threading import Thread
 from flask import Flask, request, jsonify
 from flask_httpauth import HTTPBasicAuth
-from werkzeug.security import generate_password_hash, check_password_hash
 from flask_cors import CORS
 from db import engine, Base, Session
 from event import Event
 from observer import Observer
 from config import load_vars
 from datetime import datetime, timedelta
-from threading import Thread
+from werkzeug.security import generate_password_hash, check_password_hash
+
 
 def persist_event(event):
     session = Session()
@@ -19,19 +20,24 @@ def persist_event(event):
     session.commit()
     session.close()
 
+
 def get_last_events(days):
     session = Session()
-    query_result = session.query(sa.func.concat(sa.func.day(Event.timestamp), '/', sa.func.month(Event.timestamp), '/', sa.func.year(Event.timestamp)), sa.func.count(Event.id)).filter(Event.timestamp > datetime.today() - timedelta(days = days)).group_by(sa.func.year(Event.timestamp), sa.func.month(Event.timestamp), sa.func.day(Event.timestamp)).order_by(Event.timestamp).all()
+    query_result = session.query(sa.func.concat(sa.func.day(Event.timestamp), '/', sa.func.month(Event.timestamp), '/', sa.func.year(Event.timestamp)), sa.func.count(Event.id)).filter(
+        Event.timestamp > datetime.today() - timedelta(days=days)).group_by(sa.func.year(Event.timestamp), sa.func.month(Event.timestamp), sa.func.day(Event.timestamp)).order_by(Event.timestamp).all()
     return json.dumps(query_result)
+
 
 def get_events_by_day(day, month, year):
     session = Session()
     return json.dumps(session.query(sa.func.hour(Event.timestamp), sa.func.count(Event.id)).filter(sa.extract('day', Event.timestamp) == day, sa.extract('month', Event.timestamp) == month, sa.extract('year', Event.timestamp) == year).group_by(sa.func.hour(Event.timestamp)).order_by(Event.timestamp).all())
 
+
 env_vars = load_vars()
 
 Base.metadata.create_all(engine)
-observer = Observer(4, 'asmi-wshop-bucket', env_vars['AWS_ACCESS_KEY'], env_vars['AWS_SECRET_KEY'])
+observer = Observer(10, 'asmi-wshop-bucket',
+                    env_vars['AWS_ACCESS_KEY'], env_vars['AWS_SECRET_KEY'])
 app = Flask("collector")
 auth = HTTPBasicAuth()
 
@@ -41,6 +47,7 @@ users = {
     "root": generate_password_hash(env_vars['BASIC_AUTH_PASSWORD'])
 }
 
+
 @auth.verify_password
 def verify_password(username, password):
     if username in users and check_password_hash(users.get(username), password):
@@ -49,11 +56,13 @@ def verify_password(username, password):
 
 @app.route("/", methods=['GET'])
 def index():
-    return "collector is running" 
+    return "collector is running"
+
 
 @app.route('/pictures', methods=['GET'])
 def pictures():
     return json.dumps(observer.get_last_pictures(5))
+
 
 @app.route("/data", methods=['GET'])
 def get_data():
@@ -66,6 +75,7 @@ def get_data():
 
     return get_last_events(days)
 
+
 @app.route('/detail', methods=['GET'])
 def get_detailed_day():
     try:
@@ -73,14 +83,15 @@ def get_detailed_day():
         month = int(request.args.get('month'))
         year = int(request.args.get('year'))
 
-        if day is None or day > 31 or month is None or month > 12 or year is None or year < 2018 or year > 2022: 
+        if day is None or day > 31 or month is None or month > 12 or year is None or year < 2018 or year > 2022:
             raise ValueError
-    except (ValueError, TypeError) as ex:
+    except (ValueError, TypeError):
         return "Bad request", 400
 
     return get_events_by_day(day, month, year)
 
-@app.route("/collect", methods = ['POST'])
+
+@app.route("/collect", methods=['POST'])
 @auth.login_required()
 def collect():
     try:
@@ -94,8 +105,7 @@ def collect():
         if found_event:
             Thread(target=persist_event, args=[found_event]).start()
             print("Stored cat event")
-        
+
         return "OK"
     except:
-        raise sys.exc_info()
         return jsonify(message="An error occurred"), 500
