@@ -1,24 +1,26 @@
 # dashboard
 
-## Project setup
-```
-npm install
-```
+A web interface built with [Vue.js](https://vuejs.org/) and served originally from a [Amazon S3]() bucket that calls `collector's` endpoints and displays the data in a chart
 
-### Compiles and hot-reloads for development
-```
-npm run serve
-```
+# 
+## Dependencies
+- [Vue.js](https://www.npmjs.com/package/vue)
+- [vue-material](https://www.npmjs.com/package/vue-material)
+- [vue-chartjs](https://www.npmjs.com/package/vue-chartjs)
+- [vue2-datepicker](https://www.npmjs.com/package/vue2-datepicker)
+- [vue-carousel](https://www.npmjs.com/package/vue-carousel)
+#
+## Deployment
+1. Install [Node.js](https://nodejs.org/en/download/)
 
-### Compiles and minifies for production
-```
-npm run build
-```
+2. Install the dependencies
+    - `npm install`
 
-### Lints and fixes files
-```
-npm run lint
-```
+3. Update the `Vue.prototype.$baseUrl` variable with `collector's` address in [main.js](./dashboard/src/main.js)
 
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+4. - Run the app
+        - `npm run serve`
+
+    - Or build it and [serve](https://www.npmjs.com/package/serve) it
+        - `npm run build`
+        - `serve dist`
